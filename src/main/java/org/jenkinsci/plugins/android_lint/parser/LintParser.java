@@ -87,11 +87,17 @@ public class LintParser extends AbstractAnnotationParser {
             // Get filename of first location, if available
             final String filename;
             final int lineNumber;
-            final Location[] locations = issue.getLocations().toArray(new Location[0]);
+            final Location[] locations = getFilteredLocations(issue);
             final int locationCount = locations.length;
             if (locationCount == 0) {
-                filename = FILENAME_UNKNOWN;
-                lineNumber = 0;
+                if (issue.getLocations().size() > 0) {
+                    // Locations were filtered out
+                    continue;
+                } else {
+                    // Issue had no location information
+                    filename = FILENAME_UNKNOWN;
+                    lineNumber = 0;
+                }
             } else {
                 // TODO: Ideally, we would expand relative paths (like ParserResult does later)
                 filename = locations[0].getFile();
@@ -145,6 +151,24 @@ public class LintParser extends AbstractAnnotationParser {
         }
 
         return annotations;
+    }
+
+    private Location[] getFilteredLocations(LintIssue issue) {
+        List<Location> result = new ArrayList<Location>(issue.getLocations().size());
+        for (Location l : issue.getLocations()) {
+            String file = l.getFile();
+            if (isValidPath(file)) {
+                result.add(l);
+            }
+        }
+        return result.toArray(new Location[result.size()]);
+    }
+
+    private boolean isValidPath(String file) {
+        return file.startsWith("src/") ||
+            file.startsWith("res/") ||
+            file.startsWith("bin/") ||
+            file.equals("AndroidManifest.xml");
     }
 
     /**
