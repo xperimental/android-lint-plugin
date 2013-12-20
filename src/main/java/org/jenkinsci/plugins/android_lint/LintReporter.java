@@ -33,6 +33,8 @@ public class LintReporter extends HealthAwareReporter<LintResult> {
     /** Ant fileset pattern of files to work with. */
     private final String pattern;
 
+    private final String validPathPrefixes;
+
     /**
      * Constructor.
      *
@@ -70,7 +72,7 @@ public class LintReporter extends HealthAwareReporter<LintResult> {
             final String unstableNewLow, final String failedTotalAll, final String failedTotalHigh,
             final String failedTotalNormal, final String failedTotalLow, final String failedNewAll,
             final String failedNewHigh, final String failedNewNormal, final String failedNewLow,
-            final boolean canRunOnFailed, final String pattern) {
+            final boolean canRunOnFailed, final String pattern, final String validPathPrefixes) {
         super(healthy, unhealthy, thresholdLimit, useDeltaValues,
                 unstableTotalAll, unstableTotalHigh, unstableTotalNormal, unstableTotalLow,
                 unstableNewAll, unstableNewHigh, unstableNewNormal, unstableNewLow,
@@ -78,6 +80,7 @@ public class LintReporter extends HealthAwareReporter<LintResult> {
                 failedNewAll, failedNewHigh, failedNewNormal, failedNewLow,
                 canRunOnFailed, true, PLUGIN_NAME);
         this.pattern = pattern;
+        this.validPathPrefixes = validPathPrefixes;
     }
 
     /**
@@ -87,6 +90,10 @@ public class LintReporter extends HealthAwareReporter<LintResult> {
      */
     public String getPattern() {
         return pattern;
+    }
+
+    public String getValidPathPrefixes() {
+        return validPathPrefixes;
     }
 
     @Override
@@ -99,7 +106,7 @@ public class LintReporter extends HealthAwareReporter<LintResult> {
             final MojoInfo mojo, final PluginLogger logger) throws InterruptedException, IOException {
         FilesParser lintCollector = new FilesParser(PLUGIN_NAME,
                 StringUtils.defaultIfEmpty(getPattern(), DEFAULT_PATTERN),
-                new LintParser(getDefaultEncoding()), getModuleName(pom));
+                new LintParser(getDefaultEncoding(), getValidPathPrefixes()), getModuleName(pom));
         return getTargetPath(pom).act(lintCollector);
     }
 

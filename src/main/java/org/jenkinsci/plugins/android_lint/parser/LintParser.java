@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.apache.commons.digester.Digester;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.android_lint.Messages;
 import org.xml.sax.SAXException;
 
@@ -33,13 +34,20 @@ public class LintParser extends AbstractAnnotationParser {
 
     private static final long serialVersionUID = 7110868408124058985L;
 
+    private final String[] validPathPrefixes;
+
     /**
      * Creates a parser for Android Lint files.
      *
      * @param defaultEncoding The encoding to use when reading files.
      */
-    public LintParser(final String defaultEncoding) {
+    public LintParser(final String defaultEncoding, final String validPathPrefixes) {
         super(defaultEncoding);
+        if (StringUtils.isEmpty(validPathPrefixes)) {
+            this.validPathPrefixes = new String[0];
+        } else {
+            this.validPathPrefixes = validPathPrefixes.split(",");
+        }
     }
 
     @Override
@@ -165,10 +173,16 @@ public class LintParser extends AbstractAnnotationParser {
     }
 
     private boolean isValidPath(String file) {
-        return file.startsWith("src/") ||
-            file.startsWith("res/") ||
-            file.startsWith("bin/") ||
-            file.equals("AndroidManifest.xml");
+        if (validPathPrefixes.length == 0) {
+            return true;
+        } else {
+            for (String prefix : validPathPrefixes) {
+                if (file.startsWith(prefix)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     /**

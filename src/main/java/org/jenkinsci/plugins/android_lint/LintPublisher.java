@@ -33,6 +33,8 @@ public class LintPublisher extends HealthAwarePublisher {
     /** Ant fileset pattern of files to work with. */
     private final String pattern;
 
+    private final String validPathPrefixes;
+
     /**
      * Constructor.
      *
@@ -77,7 +79,7 @@ public class LintPublisher extends HealthAwarePublisher {
             final String failedTotalNormal, final String failedTotalLow, final String failedNewAll,
             final String failedNewHigh, final String failedNewNormal, final String failedNewLow,
             final boolean canRunOnFailed, final boolean shouldDetectModules, final boolean canComputeNew,
-            final String pattern) {
+            final String pattern, final String validPathPrefixes) {
         super(healthy, unHealthy, thresholdLimit, defaultEncoding, useDeltaValues,
                 unstableTotalAll, unstableTotalHigh, unstableTotalNormal, unstableTotalLow,
                 unstableNewAll, unstableNewHigh, unstableNewNormal, unstableNewLow,
@@ -85,6 +87,7 @@ public class LintPublisher extends HealthAwarePublisher {
                 failedNewAll, failedNewHigh, failedNewNormal, failedNewLow,
                 canRunOnFailed, shouldDetectModules, canComputeNew, PLUGIN_NAME);
         this.pattern = pattern;
+        this.validPathPrefixes = validPathPrefixes;
     }
 
     /**
@@ -94,6 +97,10 @@ public class LintPublisher extends HealthAwarePublisher {
      */
     public String getPattern() {
         return pattern;
+    }
+
+    public String getValidPathPrefixes() {
+        return validPathPrefixes;
     }
 
     @Override
@@ -107,7 +114,7 @@ public class LintPublisher extends HealthAwarePublisher {
         logger.log(Messages.AndroidLint_Publisher_CollectingFiles());
         FilesParser lintCollector = new FilesParser(PLUGIN_NAME,
                 StringUtils.defaultIfEmpty(getPattern(), DEFAULT_PATTERN),
-                new LintParser(getDefaultEncoding()), shouldDetectModules(), isMavenBuild(build));
+                new LintParser(getDefaultEncoding(), getValidPathPrefixes()), shouldDetectModules(), isMavenBuild(build));
         ParserResult project = build.getWorkspace().act(lintCollector);
         logger.logLines(project.getLogMessages());
 

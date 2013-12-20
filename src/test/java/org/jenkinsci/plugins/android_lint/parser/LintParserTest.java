@@ -114,7 +114,7 @@ public class LintParserTest extends TestCase {
     }
 
     private List<LintAnnotation> parseResults(String filename) throws InvocationTargetException {
-        LintParser parser = new LintParser("UTF-8");
+        LintParser parser = new LintParser("UTF-8", null);
         InputStream stream = getClass().getResourceAsStream(filename);
         List<LintAnnotation> list = new ArrayList<LintAnnotation>();
         for (FileAnnotation a : parser.parse(stream, MODULE_NAME)) {
